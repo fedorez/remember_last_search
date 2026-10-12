@@ -44,6 +44,16 @@ function hasExplicitDefaults(config) {
     );
 }
 
+const loggedSkips = new Set();
+function logSkipOnce(actionId, reason) {
+    const token = `${actionId}:${reason}`;
+    if (loggedSkips.has(token)) {
+        return;
+    }
+    loggedSkips.add(token);
+    console.info(`${LOG_PREFIX} action ${actionId}: restore skipped (${reason})`);
+}
+
 function prepareStateForStorage(state) {
     state.sections = (state.sections || []).map(([sectionId, section]) => [
         sectionId,
@@ -100,23 +110,27 @@ patch(SearchModel.prototype, {
     async load(config) {
         const { actionId, userId } = this._rememberKeyParts();
         let usedSavedState = false;
-        if (
-            actionId &&
-            !hasExplicitDefaults(config) &&
-            this.isRememberEnabled()
-        ) {
-            const key = getStorageKey(actionId, userId);
-            const savedState = readState(key);
-            if (savedState) {
-                try {
-                    await super.load({ ...config, state: savedState });
-                    usedSavedState = true;
-                } catch (error) {
-                    browser.localStorage.removeItem(key);
-                    console.warn(
-                        `${LOG_PREFIX} saved search for key "${key}" could not be applied and was removed:`,
-                        error
-                    );
+        if (actionId) {
+            if (hasExplicitDefaults(config)) {
+                logSkipOnce(actionId, "action context has explicit search defaults");
+            } else if (!storageAvailable()) {
+                logSkipOnce(actionId, "localStorage unavailable");
+            } else if (!this.isRememberEnabled()) {
+                logSkipOnce(actionId, "remembering disabled for this action");
+            } else {
+                const key = getStorageKey(actionId, userId);
+                const savedState = readState(key);
+                if (savedState) {
+                    try {
+                        await super.load({ ...config, state: savedState });
+                        usedSavedState = true;
+                    } catch (error) {
+                        browser.localStorage.removeItem(key);
+                        console.warn(
+                            `${LOG_PREFIX} saved search for key "${key}" could not be applied and was removed:`,
+                            error
+                        );
+                    }
                 }
             }
         }

@@ -35,12 +35,35 @@ function getDisabledKey(actionId, userId) {
     return `${STORAGE_PREFIX}:off:${userId}:${actionId}`;
 }
 
-function hasExplicitDefaults(config) {
+function getExplicitDefaults(config) {
     const context = config.context || {};
-    return (
-        Object.keys(context).some(
-            (key) => key.startsWith("search_default_") || key.startsWith("searchpanel_default_")
-        ) || Boolean(config.dynamicFilters && config.dynamicFilters.length)
+    const searchDefaults = Object.keys(context)
+        .filter((key) => key.startsWith("search_default_"))
+        .map((key) => key.slice("search_default_".length));
+    const searchPanelDefaults = Object.keys(context).filter((key) =>
+        key.startsWith("searchpanel_default_")
+    );
+    return {
+        searchDefaults,
+        searchPanelDefaults,
+        hasDynamicFilters: Boolean(config.dynamicFilters && config.dynamicFilters.length),
+    };
+}
+
+function savedStateCoversDefaults(savedState, names) {
+    const query = savedState.query || [];
+    const items = savedState.searchItems || {};
+    return names.every((name) =>
+        query.some((elem) => {
+            const item = items[elem.searchItemId];
+            if (!item) {
+                return false;
+            }
+            if (item.type === "field") {
+                return item.fieldName === name && Boolean(elem.autocompleteValue);
+            }
+            return item.name === name;
+        })
     );
 }
 
@@ -111,8 +134,11 @@ patch(SearchModel.prototype, {
         const { actionId, userId } = this._rememberKeyParts();
         let usedSavedState = false;
         if (actionId) {
-            if (hasExplicitDefaults(config)) {
-                logSkipOnce(actionId, "action context has explicit search defaults");
+            const explicit = getExplicitDefaults(config);
+            if (explicit.hasDynamicFilters) {
+                logSkipOnce(actionId, "action opened with dynamic filters");
+            } else if (explicit.searchPanelDefaults.length) {
+                logSkipOnce(actionId, "action context has searchpanel_default_*");
             } else if (!storageAvailable()) {
                 logSkipOnce(actionId, "localStorage unavailable");
             } else if (!this.isRememberEnabled()) {
@@ -120,7 +146,12 @@ patch(SearchModel.prototype, {
             } else {
                 const key = getStorageKey(actionId, userId);
                 const savedState = readState(key);
-                if (savedState) {
+                if (savedState && !savedStateCoversDefaults(savedState, explicit.searchDefaults)) {
+                    logSkipOnce(
+                        actionId,
+                        "saved search conflicts with the default filters from the action context"
+                    );
+                } else if (savedState) {
                     try {
                         await super.load({ ...config, state: savedState });
                         usedSavedState = true;

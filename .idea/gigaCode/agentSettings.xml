@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GigaCodeAgentSettings">
+    <option name="autoApprovedCommands">
+      <list>
+        <Execute>
+          <option name="pattern" value="dir C:\ /s /b 2&gt;nul" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="dir C:\Users /s /b 2&gt;nul" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="dir &quot;C:\Program Files&quot; /s /b 2&gt;nul" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Program Files&quot; -Recurse -Filter &quot;search_model.js&quot; -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Users&quot; -Directory -Filter &quot;*odoo*&quot; -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Users\d.fedorets&quot; -Recurse -Directory -Filter &quot;web&quot; -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Users\d.fedorets&quot; -Recurse -Filter &quot;*.js&quot; -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Select-String -Pattern &quot;export class SearchModel&quot; -List" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Users\d.fedorets&quot; -Recurse -Directory -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Users\d.fedorets\IdeaProjects&quot; -Recurse -Filter &quot;*.js&quot; -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Users\d.fedorets\Downloads&quot; -Recurse -Directory -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Users\d.fedorets\IdeaProjects&quot; -Recurse -Directory -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Get-ChildItem -Path &quot;C:\Users\d.fedorets\IdeaProjects&quot; -Recurse -Directory -Filter &quot;node_modules&quot; -ErrorAction SilentlyContinue" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="Where-Object { $_.Name -eq &quot;search_model.js&quot; -or $_.Name -eq &quot;SearchModel.js&quot; }" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="curl -s &quot;https://raw.githubusercontent.com/odoo/odoo/17.0/addons/web/static/src/js/search/search_model.js&quot;" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="curl -s &quot;https://raw.githubusercontent.com/odoo/odoo/17.0/addons/web/static/src/search/search_model.js&quot;" />
+        </Execute>
+        <Execute>
+          <option name="pattern" value="powershell -Command &quot;(Invoke-RestMethod -Uri 'https://api.github.com/repos/odoo/odoo/git/trees/17.0?recursive=1').tree | Where-Object { $_.path -match 'addons/web/static/src.*views.*view.*\.js' } | Select-Object path&quot;" />
+        </Execute>
+      </list>
+    </option>
+    <option name="autoApprovedReads">
+      <list>
+        <Read>
+          <option name="pattern" value="$USER_HOME$/odoo/*" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$USER_HOME$/odoo17/*" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$PROJECT_DIR$/../../../../Program Files/Odoo/*" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$USER_HOME$/Downloads/remember_last_search/static/src/js/search_model_patch.js" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$USER_HOME$/Downloads/remember_last_search/static/src/js/favorite_menu_items.js" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$PROJECT_DIR$/../auto_fill/static/src/js/auto_fill.js" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$PROJECT_DIR$/../old_remember_last_search/static/src/js/remember_last_search.js" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$USER_HOME$/*" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$PROJECT_DIR$/../../../../temp/search_model.js" />
+        </Read>
+        <Read>
+          <option name="pattern" value="$PROJECT_DIR$/../../../../temp/view.js" />
+        </Read>
+      </list>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="remember_last_search.ToggleItem">
+        <DropdownItem parentClosingMode="'none'" onSelected="() => this.onToggle()">
+            <div class="o_menu_item form-check d-flex align-items-center ps-1">
+                <input type="checkbox"
+                       class="form-check-input o_remember_toggle me-2"
+                       tabindex="-1"
+                       t-att-checked="state.enabled"/>
+                <label class="form-check-label text-truncate" t-esc="label"/>
+            </div>
+        </DropdownItem>
+    </t>
+
+    <t t-name="remember_last_search.ForgetItem">
+        <DropdownItem onSelected="() => this.onClick()"
+                      class="hasSaved ? '' : 'o_disabled text-muted'">
+            <span class="o_menu_item text-truncate" t-esc="label"/>
+        </DropdownItem>
+    </t>
+
+</templates>

@@ -5,6 +5,27 @@ import { patch } from "@web/core/utils/patch";
 import { SearchModel } from "@web/search/search_model";
 
 const STORAGE_PREFIX = "remember_last_search:v1";
+const LOG_PREFIX = "[remember_last_search]";
+let warnedNoStorage = false;
+let warnedWriteFailure = false;
+
+function storageAvailable() {
+    try {
+        const probe = `${STORAGE_PREFIX}:probe`;
+        browser.localStorage.setItem(probe, "1");
+        browser.localStorage.removeItem(probe);
+        return true;
+    } catch (error) {
+        if (!warnedNoStorage) {
+            warnedNoStorage = true;
+            console.warn(
+                `${LOG_PREFIX} localStorage is not available, search persistence is disabled.`,
+                error
+            );
+        }
+        return false;
+    }
+}
 
 function getStorageKey(actionId, userId) {
     return `${STORAGE_PREFIX}:${userId}:${actionId}`;
@@ -49,21 +70,30 @@ function readState(key) {
             state.searchItems &&
             typeof state.searchItems === "object" &&
             Array.isArray(state.sections);
-        if (!isValid) {
-            throw new Error("Malformed saved search state");
+        if (isValid) {
+            return prepareStateForStorage(state);
         }
-        return prepareStateForStorage(state);
+        throw new Error("Malformed saved search state");
     } catch (error) {
         browser.localStorage.removeItem(key);
+        console.warn(`${LOG_PREFIX} dropped saved search for key "${key}":`, error);
         return null;
     }
 }
 
 function writeState(key, searchModel) {
+    if (!storageAvailable()) {
+        return;
+    }
     try {
         const state = prepareStateForStorage(searchModel.exportState());
         browser.localStorage.setItem(key, JSON.stringify(state));
-    } catch (error) {}
+    } catch (error) {
+        if (!warnedWriteFailure) {
+            warnedWriteFailure = true;
+            console.warn(`${LOG_PREFIX} could not save search state:`, error);
+        }
+    }
 }
 
 patch(SearchModel.prototype, {
@@ -83,6 +113,10 @@ patch(SearchModel.prototype, {
                     usedSavedState = true;
                 } catch (error) {
                     browser.localStorage.removeItem(key);
+                    console.warn(
+                        `${LOG_PREFIX} saved search for key "${key}" could not be applied and was removed:`,
+                        error
+                    );
                 }
             }
         }
@@ -118,7 +152,7 @@ patch(SearchModel.prototype, {
 
     isRememberEnabled() {
         const { actionId, userId } = this._rememberKeyParts();
-        if (!actionId) {
+        if (!actionId || !storageAvailable()) {
             return false;
         }
         try {
@@ -130,7 +164,7 @@ patch(SearchModel.prototype, {
 
     setRememberEnabled(enabled) {
         const { actionId, userId } = this._rememberKeyParts();
-        if (!actionId) {
+        if (!actionId || !storageAvailable()) {
             return;
         }
         try {
@@ -145,7 +179,7 @@ patch(SearchModel.prototype, {
 
     hasSavedSearch() {
         const { actionId, userId } = this._rememberKeyParts();
-        if (!actionId) {
+        if (!actionId || !storageAvailable()) {
             return false;
         }
         try {
@@ -190,3 +224,5 @@ patch(SearchModel.prototype, {
         await this._notify();
     },
 });
+
+console.info(`${LOG_PREFIX} SearchModel patch applied`);

@@ -54,6 +54,9 @@
         <Execute>
           <option name="pattern" value="powershell -Command &quot;(Invoke-RestMethod -Uri 'https://api.github.com/repos/odoo/odoo/git/trees/17.0?recursive=1').tree | Where-Object { $_.path -match 'addons/web/static/src.*views.*view.*\.js' } | Select-Object path&quot;" />
         </Execute>
+        <Execute>
+          <option name="pattern" value="curl -s &quot;https://raw.githubusercontent.com/odoo/odoo/17.0/addons/web/static/src/search/with_search/with_search.js&quot;" />
+        </Execute>
       </list>
     </option>
     <option name="autoApprovedReads">
